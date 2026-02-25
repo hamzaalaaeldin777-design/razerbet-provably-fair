@@ -1,0 +1,104 @@
+{
+  "design_system": {
+    "typography": {
+      "font_family": {
+        "headings": "Chivo, sans-serif",
+        "body": "Manrope, sans-serif",
+        "mono": "JetBrains Mono, monospace"
+      },
+      "scale": {
+        "h1": "text-5xl md:text-7xl font-black tracking-tighter uppercase",
+        "h2": "text-3xl md:text-5xl font-bold tracking-tight",
+        "h3": "text-xl md:text-2xl font-bold",
+        "body": "text-base leading-relaxed text-muted-foreground",
+        "caption": "text-xs uppercase tracking-widest text-muted-foreground/60",
+        "code": "font-mono text-sm bg-black/50 p-1 rounded text-orange-400"
+      }
+    },
+    "colors": {
+      "theme": "dark",
+      "palette": {
+        "background": "#050505",
+        "surface": "#0F0F10",
+        "surface_highlight": "#18181B",
+        "primary_gradient": "linear-gradient(135deg, #FF6B00 0%, #FF0040 100%)",
+        "accent_orange": "#FF6B00",
+        "accent_red": "#FF0040",
+        "text_primary": "#EDEDED",
+        "text_secondary": "#A1A1AA",
+        "border": "#27272A",
+        "success": "#22C55E",
+        "error": "#EF4444"
+      }
+    },
+    "visual_enhancers": {
+      "borders": "1px solid rgba(255, 255, 255, 0.08)",
+      "glassmorphism": "backdrop-blur-xl bg-black/40 border border-white/10",
+      "glows": "box-shadow: 0 0 40px -10px rgba(255, 107, 0, 0.3)",
+      "gradients": "bg-gradient-to-r from-orange-500 to-red-600",
+      "radius": "rounded-md"
+    }
+  },
+  "layout_strategy": {
+    "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+    "spacing": {
+      "section_gap": "py-24 md:py-32",
+      "component_gap": "gap-8"
+    },
+    "grid_systems": {
+      "hero": "flex flex-col items-center justify-center text-center min-h-[80vh]",
+      "features": "grid grid-cols-1 md:grid-cols-3 gap-8",
+      "verification_dashboard": "grid grid-cols-1 lg:grid-cols-12 gap-8"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold py-3 px-8 rounded-md shadow-[0_0_20px_rgba(255,107,0,0.4)] transition-all hover:scale-105",
+      "secondary": "bg-white/5 border border-white/10 hover:bg-white/10 text-white font-medium py-3 px-8 rounded-md transition-all",
+      "ghost": "text-muted-foreground hover:text-white transition-colors"
+    },
+    "cards": {
+      "base": "bg-[#0F0F10] border border-white/5 rounded-xl p-6 hover:border-orange-500/30 transition-colors",
+      "glass": "backdrop-blur-md bg-black/60 border border-white/10 rounded-xl p-6"
+    },
+    "inputs": {
+      "base": "bg-black/40 border border-white/10 focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50 rounded-md h-12 px-4 text-white placeholder:text-white/20 font-mono transition-all"
+    }
+  },
+  "assets": {
+    "images": {
+      "hero_bg": "https://images.unsplash.com/photo-1660685646411-bac1edbeb535?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "casino_abstract": "https://images.pexels.com/photos/269630/pexels-photo-269630.jpeg",
+      "texture_overlay": "https://images.unsplash.com/photo-1642294279388-8718fcda6145?crop=entropy&cs=srgb&fm=jpg&q=85"
+    },
+    "icons": "Use Lucide React (already installed). Examples: ShieldCheck, Dices, History, Terminal, ChevronDown, ExternalLink"
+  },
+  "page_structure": {
+    "hero": {
+      "title": "PROVABLY FAIR VERIFICATION",
+      "subtitle": "Don't trust. Verify. Validate every game outcome on RazerBet with cryptographic certainty.",
+      "cta": "Verify Now",
+      "secondary_cta": "Join Discord"
+    },
+    "verification_tool": {
+      "layout": "Split view: Left side inputs (Game Type, Server Seed, Client Seed, Nonce), Right side 'Terminal' output showing the calculation steps and final result.",
+      "features": ["Auto-calculation on input change", "Copy result button", "Success/Fail visual indicators"]
+    },
+    "live_feed": {
+      "title": "Live Verification Feed",
+      "style": "Scrolling ticker or dense list showing: Game Icon | User (masked) | Bet Amount | Multiplier | Verification Status (Verified Badge)"
+    },
+    "how_it_works": {
+      "style": "3-Step Process Cards: 1. The Seed Pair, 2. The Hash, 3. The Result. Use icons for each step."
+    }
+  },
+  "universal_guidelines": [
+    "Use 'sonner' for all toast notifications.",
+    "Implement 'lenis' for smooth scrolling if possible, or standard smooth scroll.",
+    "Ensure all interactive elements have hover states (brightness-125 or scale-105).",
+    "Use 'data-testid' on all inputs and buttons.",
+    "Do not use gradients for text unless it's a very large heading.",
+    "Keep the UI 'dense' for the verification tool part - it should feel like a pro tool.",
+    "Use the 'orange-red' gradient sparingly as an accent, not a background flood."
+  ]
+}
