@@ -16,8 +16,25 @@ from datetime import datetime, timezone
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection (optional)
-mongo_url = os.environ.get('MONGO_URL')
+# MongoDB connection (optional) - fix password encoding if URL contains special chars
+def _fix_mongo_url(url):
+    if not url or '://' not in url:
+        return url
+    from urllib.parse import quote_plus
+    scheme, rest = url.split('://', 1)
+    if '@' not in rest:
+        return url
+    last_at = rest.rfind('@')
+    credentials = rest[:last_at]
+    host_part = rest[last_at + 1:]
+    if ':' not in credentials:
+        return url
+    colon_idx = credentials.index(':')
+    user = credentials[:colon_idx]
+    password = credentials[colon_idx + 1:]
+    return f"{scheme}://{quote_plus(user)}:{quote_plus(password)}@{host_part}"
+
+mongo_url = _fix_mongo_url(os.environ.get('MONGO_URL'))
 client = AsyncIOMotorClient(mongo_url) if mongo_url else None
 db = client[os.environ.get('DB_NAME', 'razerbet')] if client else None
 

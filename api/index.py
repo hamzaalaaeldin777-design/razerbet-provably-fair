@@ -1,18 +1,34 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Header, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from mangum import Mangum
 from pymongo import MongoClient
 import os
 import hashlib
 import hmac
 import secrets
+from urllib.parse import quote_plus
 from pydantic import BaseModel
 from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
 
+def _fix_mongo_url(url):
+    if not url or '://' not in url:
+        return url
+    scheme, rest = url.split('://', 1)
+    if '@' not in rest:
+        return url
+    last_at = rest.rfind('@')
+    credentials = rest[:last_at]
+    host_part = rest[last_at + 1:]
+    if ':' not in credentials:
+        return url
+    colon_idx = credentials.index(':')
+    user = credentials[:colon_idx]
+    password = credentials[colon_idx + 1:]
+    return f"{scheme}://{quote_plus(user)}:{quote_plus(password)}@{host_part}"
+
 # MongoDB connection - use environment variable
-MONGO_URL = os.environ.get('MONGO_URL', '')
+MONGO_URL = _fix_mongo_url(os.environ.get('MONGO_URL', ''))
 DB_NAME = os.environ.get('DB_NAME', 'razerbet')
 BOT_API_KEY = os.environ.get('BOT_API_KEY', 'rzrbt_a81bc6b34dc15aae0a8ca9e2a9d517064deecaca727675c1')
 
@@ -358,5 +374,3 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Vercel serverless handler
-handler = Mangum(app, lifespan="off")
