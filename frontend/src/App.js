@@ -1,7 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import axios from "axios";
+import CrashPage from "./components/games/CrashPage";
+import CoinflipPage from "./components/games/CoinflipPage";
+import DicesWarPage from "./components/games/DicesWarPage";
+import MinesPage from "./components/games/MinesPage";
+import TowerPage from "./components/games/TowerPage";
+import BlackjackPage from "./components/games/BlackjackPage";
+import MatchPage from "./components/games/MatchPage";
 import { Toaster, toast } from "sonner";
 import { 
   ShieldCheck, 
@@ -106,7 +113,7 @@ const Hero = () => {
         >
           <Button 
             className="btn-primary px-8 py-6 text-lg font-bold rounded-lg"
-            onClick={() => document.getElementById('verify-section')?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={() => document.getElementById('games-section')?.scrollIntoView({ behavior: 'smooth' })}
             data-testid="verify-now-btn"
           >
             <ShieldCheck className="w-5 h-5 mr-2" />
@@ -852,39 +859,40 @@ const HowItWorks = () => {
 
 // Games Section
 const GamesList = () => {
+  const navigate = useNavigate();
   const games = [
-    { key: "coinflip", name: "Coinflip", desc: "50/50 heads or tails" },
-    { key: "crash", name: "Crash", desc: "Cash out before crash" },
-    { key: "mines", name: "Mines", desc: "Avoid the mines" },
-    { key: "tower", name: "Tower", desc: "Climb the tower" },
-    { key: "blackjack", name: "Blackjack", desc: "Beat the dealer" },
-    { key: "dices_war", name: "Dices War", desc: "Roll higher than house" },
-    { key: "match", name: "Match", desc: "Match to win" }
+    { key: "coinflip", name: "Coinflip", desc: "50/50 heads or tails", emoji: "🪙", route: "/coinflip" },
+    { key: "crash", name: "Crash", desc: "Cash out before crash", emoji: "🚀", route: "/crash" },
+    { key: "mines", name: "Mines", desc: "Avoid the mines", emoji: "💣", route: "/mines" },
+    { key: "tower", name: "Tower", desc: "Climb the tower", emoji: "🗼", route: "/tower" },
+    { key: "blackjack", name: "Blackjack", desc: "Beat the dealer", emoji: "🃏", route: "/blackjack" },
+    { key: "dices_war", name: "Dices War", desc: "Roll higher than house", emoji: "🎲", route: "/dices-war" },
+    { key: "match", name: "Match", desc: "Match to win", emoji: "🎯", route: "/match" }
   ];
 
   return (
-    <section className="py-24 px-4 bg-[#0a0a0b]">
+    <section id="games-section" className="py-24 px-4 bg-[#0a0a0b]">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4" data-testid="games-section-title">
-            Supported <span className="gradient-text">Games</span>
+            Pick a <span className="gradient-text">Game</span> to Verify
           </h2>
-          <p className="text-zinc-400">All games use the same provably fair algorithm</p>
+          <p className="text-zinc-400">Click any game below to open its dedicated verification page</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
           {games.map((game) => (
             <Card 
               key={game.key} 
-              className="glass border-white/10 card-hover text-center"
+              className="glass border-white/10 card-hover text-center cursor-pointer group"
               data-testid={`game-card-${game.key}`}
+              onClick={() => navigate(game.route)}
             >
-              <CardContent className="pt-6">
-                <div className={`game-badge ${game.key} mx-auto mb-3 justify-center`}>
-                  {GAME_ICONS[game.key]}
-                </div>
-                <h3 className="font-bold text-white mb-1">{game.name}</h3>
-                <p className="text-xs text-zinc-500">{game.desc}</p>
+              <CardContent className="pt-6 pb-5">
+                <div className="text-3xl mb-3">{game.emoji}</div>
+                <h3 className="font-bold text-white mb-1 group-hover:text-orange-400 transition-colors">{game.name}</h3>
+                <p className="text-xs text-zinc-500 mb-3">{game.desc}</p>
+                <span className="text-xs text-orange-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity">Verify →</span>
               </CardContent>
             </Card>
           ))}
@@ -942,10 +950,9 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-[#050505]">
       <Hero />
-      <VerificationTool />
+      <GamesList />
       <LiveFeed />
       <HowItWorks />
-      <GamesList />
       <Footer />
     </div>
   );
@@ -968,6 +975,13 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/crash" element={<CrashPage />} />
+          <Route path="/coinflip" element={<CoinflipPage />} />
+          <Route path="/dices-war" element={<DicesWarPage />} />
+          <Route path="/mines" element={<MinesPage />} />
+          <Route path="/tower" element={<TowerPage />} />
+          <Route path="/blackjack" element={<BlackjackPage />} />
+          <Route path="/match" element={<MatchPage />} />
         </Routes>
       </BrowserRouter>
     </div>
