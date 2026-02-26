@@ -39,8 +39,15 @@ db = None
 def get_db():
     global client, db
     if client is None and MONGO_URL:
-        client = MongoClient(MONGO_URL)
-        db = client[DB_NAME]
+        try:
+            client = MongoClient(MONGO_URL, serverSelectionTimeoutMS=5000, connectTimeoutMS=5000)
+            db = client[DB_NAME]
+            # Force a connection check
+            client.admin.command('ping')
+        except Exception as e:
+            print(f"MongoDB connection error: {e}")
+            client = None
+            db = None
     return db
 
 # Create FastAPI app
@@ -327,8 +334,11 @@ def get_user_seeds(user_id: str, x_api_key: str = Header(None)):
     verify_bot_api_key(x_api_key)
     database = get_db()
     if not database:
-        raise HTTPException(status_code=404, detail="Database not configured")
-    seeds = database.user_seeds.find_one({"user_id": user_id, "active": True}, {"_id": 0})
+        raise HTTPException(status_code=503, detail="Database unavailable — add MONGO_URL to Vercel environment variables")
+    try:
+        seeds = database.user_seeds.find_one({"user_id": user_id, "active": True}, {"_id": 0})
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Database error: {str(e)}")
     if not seeds:
         raise HTTPException(status_code=404, detail="No active seeds for user")
     return {"server_seed_hash": seeds["server_seed_hash"], "client_seed": seeds["client_seed"], "nonce": seeds["nonce"]}
@@ -338,18 +348,20 @@ def reveal_user_seeds(user_id: str, x_api_key: str = Header(None)):
     verify_bot_api_key(x_api_key)
     database = get_db()
     if not database:
-        raise HTTPException(status_code=404, detail="Database not configured")
-    seeds = database.user_seeds.find_one({"user_id": user_id, "active": True}, {"_id": 0})
-    if not seeds:
-        raise HTTPException(status_code=404, detail="No active seeds for user")
-    
-    database.user_seeds.update_one({"id": seeds["id"]}, {"$set": {"active": False, "revealed_at": datetime.now(timezone.utc).isoformat()}})
-    
-    new_server_seed = generate_server_seed()
-    new_server_seed_hash = hash_server_seed(new_server_seed)
-    new_doc = {"id": str(uuid.uuid4()), "user_id": user_id, "server_seed": new_server_seed, "server_seed_hash": new_server_seed_hash, "client_seed": seeds["client_seed"], "nonce": 0, "active": True, "created_at": datetime.now(timezone.utc).isoformat()}
-    database.user_seeds.insert_one(new_doc)
-    
+        raise HTTPException(status_code=503, detail="Database unavailable — add MONGO_URL to Vercel environment variables")
+    try:
+        seeds = database.user_seeds.find_one({"user_id": user_id, "active": True}, {"_id": 0})
+        if not seeds:
+            raise HTTPException(status_code=404, detail="No active seeds for user")
+        database.user_seeds.update_one({"id": seeds["id"]}, {"$set": {"active": False, "revealed_at": datetime.now(timezone.utc).isoformat()}})
+        new_server_seed = generate_server_seed()
+        new_server_seed_hash = hash_server_seed(new_server_seed)
+        new_doc = {"id": str(uuid.uuid4()), "user_id": user_id, "server_seed": new_server_seed, "server_seed_hash": new_server_seed_hash, "client_seed": seeds["client_seed"], "nonce": 0, "active": True, "created_at": datetime.now(timezone.utc).isoformat()}
+        database.user_seeds.insert_one(new_doc)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Database error: {str(e)}")
     return {"revealed_server_seed": seeds["server_seed"], "revealed_server_seed_hash": seeds["server_seed_hash"], "new_server_seed_hash": new_server_seed_hash, "client_seed": seeds["client_seed"]}
 
 @api_router.post("/bot/seeds/{user_id}/increment-nonce")
@@ -357,8 +369,11 @@ def increment_nonce(user_id: str, x_api_key: str = Header(None)):
     verify_bot_api_key(x_api_key)
     database = get_db()
     if not database:
-        raise HTTPException(status_code=404, detail="Database not configured")
-    result = database.user_seeds.find_one_and_update({"user_id": user_id, "active": True}, {"$inc": {"nonce": 1}}, return_document=True)
+        raise HTTPException(status_code=503, detail="Database unavailable — add MONGO_URL to Vercel environment variables")
+    try:
+        result = database.user_seeds.find_one_and_update({"user_id": user_id, "active": True}, {"$inc": {"nonce": 1}}, return_document=True)
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Database error: {str(e)}")
     if not result:
         raise HTTPException(status_code=404, detail="No active seeds for user")
     return {"nonce": result["nonce"]}
